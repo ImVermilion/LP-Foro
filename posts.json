@@ -1,0 +1,31 @@
+{
+  "categorias": [
+    {
+      "id": "lore",
+      "nombre": "Historia y Lore",
+      "descripcion": "Relatos de Azeroth y crónicas del servidor.",
+      "temas": [
+        {
+          "id": 1,
+          "titulo": "El despertar de los Ancestros",
+          "autor": "TheFer",
+          "contenido": "Hace mucho tiempo, en las tierras de Azeroth...",
+          "fecha": "02/02/2026",
+          "privado": false
+        }
+      ]
+    },
+    {
+      "id": "fichas",
+      "nombre": "Fichas de Personaje",
+      "descripcion": "Publica aquí la historia de tu héroe.",
+      "temas": []
+    },
+    {
+      "id": "taberna",
+      "nombre": "La Taberna (Off-topic)",
+      "descripcion": "Charlas fuera de rol y convivencia.",
+      "temas": []
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+:root {
+    --bg-dark: #121212;
+    --card-bg: #1c1c1c;
+    --wow-gold: #c19149;
+    --border: #333;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    margin: 0;
+}
+
+.top-bar {
+    background: #000;
+    padding: 15px 50px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--wow-gold);
+}
+
+.container { padding: 20px; max-width: 1000px; margin: auto; }
+
+/* Estilo XenForo Post */
+.post {
+    display: flex;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+}
+
+.user-sidebar {
+    width: 150px;
+    background: #252525;
+    padding: 15px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+}
+
+.avatar { width: 80px; height: 80px; border: 2px solid var(--wow-gold); border-radius: 4px; }
+
+.username { font-weight: bold; margin-top: 10px; color: var(--wow-gold); }
+
+.rank { font-size: 0.7em; text-transform: uppercase; margin-top: 5px; }
+.gm { color: #ff4444; font-weight: bold; }
+
+.post-content { padding: 20px; flex-grow: 1; position: relative; }
+
+.btn-wow {
+    background: linear-gradient(#4a3421, #2d1f14);
+    border: 1px solid var(--wow-gold);
+    color: white;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.gm-only { display: none; background: #551111; color: white; border: none; }

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Leyendas del Pasado | Foro de Rol</title>
+    <style>
+        :root { --wow-gold: #c19149; --bg: #0b0d0f; --card: #15171a; --border: #2a2e33; --text: #e0e0e0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .hidden { display: none !important; }
+
+        /* Login */
+        #pantalla-login { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .login-card { background: var(--card); padding: 30px; border: 1px solid var(--wow-gold); border-radius: 8px; width: 320px; text-align: center; }
+        
+        /* Layout */
+        header { background: #000; padding: 20px; border-bottom: 3px solid var(--wow-gold); text-align: center; }
+        .container { max-width: 1000px; margin: 20px auto; padding: 20px; }
+        
+        /* Foro Estilo XenForo */
+        .cat-box { background: var(--card); border: 1px solid var(--border); margin-bottom: 20px; border-radius: 4px; overflow: hidden; }
+        .cat-header { background: #1c1f23; padding: 12px; font-weight: bold; color: var(--wow-gold); border-bottom: 1px solid var(--border); }
+        .item { display: flex; padding: 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.3s; }
+        .item:hover { background: #1d2126; }
+        .item-info { flex-grow: 1; }
+        .item-title { font-size: 1.2em; font-weight: bold; color: #fff; display: block; }
+        
+        /* Post View */
+        .post { display: flex; background: var(--card); border: 1px solid var(--border); margin-bottom: 10px; }
+        .author { width: 150px; background: #1a1d21; padding: 20px; text-align: center; border-right: 1px solid var(--border); }
+        .avatar { width: 80px; height: 80px; border: 2px solid var(--wow-gold); margin-bottom: 10px; }
+        .post-body { padding: 20px; flex-grow: 1; }
+        
+        /* UI */
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #000; color: #fff; border: 1px solid var(--border); box-sizing: border-box; }
+        .btn { background: var(--wow-gold); color: #000; padding: 10px 20px; border: none; font-weight: bold; cursor: pointer; border-radius: 3px; }
+        .breadcrumb { margin-bottom: 15px; color: var(--wow-gold); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="pantalla-login">
+    <h1 style="color:var(--wow-gold)">LEYENDAS DEL PASADO</h1>
+    <div class="login-card">
+        <h3>Acceso al Reino</h3>
+        <input type="text" id="user" placeholder="Usuario">
+        <input type="password" id="pass" placeholder="Contraseña">
+        <button class="btn" onclick="login()">ENTRAR</button>
+        <p style="font-size: 0.8em; color: #888; margin-top: 15px;">Para registrarte, contacta con thefer4death@gmail.com</p>
+    </div>
+</div>
+
+<div id="interfaz-foro" class="hidden">
+    <header>
+        <h1 style="color:var(--wow-gold); margin:0;">FORO LEYENDAS</h1>
+        <div id="status-bar" style="font-size: 0.8em; margin-top:10px;"></div>
+    </header>
+
+    <div class="container">
+        <div id="nav" class="breadcrumb" onclick="renderCategorias()"> < Volver al Inicio</div>
+        
+        <div id="view-categorias"></div>
+        <div id="view-temas" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="cat-nombre"></h2>
+                <button class="btn" onclick="abrirEditor()">+ NUEVO TEMA</button>
+            </div>
+            <div id="lista-hilos"></div>
+        </div>
+        <div id="view-post" class="hidden">
+            <h2 id="post-titulo"></h2>
+            <div id="post-completo"></div>
+        </div>
+
+        <div id="editor" class="hidden" style="background: var(--card); padding: 20px; border: 1px solid var(--wow-gold);">
+            <h3>Crear nuevo tema</h3>
+            <input type="text" id="new-titulo" placeholder="Título">
+            <textarea id="new-content" rows="10" placeholder="Contenido..."></textarea>
+            <button class="btn" onclick="alert('Necesitas configurar el Token de GitHub para guardar datos de verdad.')">PUBLICAR</button>
+            <button class="btn" style="background:#444" onclick="renderCategorias()">CANCELAR</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- CONFIGURACIÓN ---
+    const CONFIG = {
+        owner: "TU_USUARIO_AQUÍ", // REEMPLAZA
+        repo: "TU_REPO_AQUÍ",     // REEMPLAZA
+        urlUsers: "./"
+    };
+    CONFIG.urlBase = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/main/`;
+
+    let db = null;
+    let miUser = null;
+
+    async function login() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+
+        try {
+            const res = await fetch(CONFIG.urlBase + "usuarios.json?t=" + Date.now());
+            if(!res.ok) throw new Error("No se pudo cargar usuarios.json");
+            const usuarios = await res.json();
+            
+            miUser = usuarios.find(x => x.user === u && x.pass === p);
+            
+            if(miUser) {
+                document.getElementById('pantalla-login').classList.add('hidden');
+                document.getElementById('interfaz-foro').classList.remove('hidden');
+                document.getElementById('status-bar').innerText = `Héroe: ${miUser.user} | Rango: ${miUser.rango}`;
+                cargarForo();
+            } else {
+                alert("Usuario o clave incorrectos.");
+            }
+        } catch(e) {
+            alert("Error de conexión: " + e.message);
+        }
+    }
+
+    async function cargarForo() {
+        const res = await fetch(CONFIG.urlBase + "posts.json?t=" + Date.now());
+        db = await res.json();
+        renderCategorias();
+    }
+
+    function renderCategorias() {
+        showView('view-categorias');
+        const cont = document.getElementById('view-categorias');
+        cont.innerHTML = `<div class="cat-box"><div class="cat-header">Categorías del Reino</div><div id="cats"></div></div>`;
+        const list = cont.querySelector('#cats');
+        
+        db.categorias.forEach(c => {
+            list.innerHTML += `
+                <div class="item" onclick="verCategoria('${c.id}')">
+                    <div class="item-info">
+                        <span class="item-title">${c.nombre}</span>
+                        <span style="color:#888">${c.descripcion}</span>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function verCategoria(id) {
+        showView('view-temas');
+        const cat = db.categorias.find(x => x.id === id);
+        document.getElementById('cat-nombre').innerText = cat.nombre;
+        const list = document.getElementById('lista-hilos');
+        list.innerHTML = cat.temas.length ? "" : "No hay temas en esta sección.";
+        
+        cat.temas.forEach(t => {
+            list.innerHTML += `
+                <div class="item" onclick="verPost('${id}', ${t.id})">
+                    <div class="item-info">
+                        <span class="item-title">${t.titulo}</span>
+                        <span style="font-size:0.8em; color:var(--wow-gold)">Iniciado por ${t.autor} el ${t.fecha}</span>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function verPost(catId, postId) {
+        showView('view-post');
+        const cat = db.categorias.find(x => x.id === catId);
+        const p = cat.temas.find(x => x.id === postId);
+        document.getElementById('post-titulo').innerText = p.titulo;
+        document.getElementById('post-completo').innerHTML = `
+            <div class="post">
+                <div class="author">
+                    <img src="${miUser.avatar}" class="avatar"><br>
+                    <strong>${p.autor}</strong><br><small>${p.rango || 'User'}</small>
+                </div>
+                <div class="post-body">${p.contenido}</div>
+            </div>`;
+    }
+
+    function showView(id) {
+        ['view-categorias', 'view-temas', 'view-post', 'editor'].forEach(v => {
+            document.getElementById(v).classList.add('hidden');
+        });
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function abrirEditor() { showView('editor'); }
+
+</script>
+</body>
+</html>
